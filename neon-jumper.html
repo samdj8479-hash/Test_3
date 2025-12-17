@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Jumper - Orbital Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #2a2a2a 0%, #3a3a3a 100%);
+            color: #f0f0f0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background-color: rgba(42, 42, 42, 0.8);
+        }
+
+        .menu-icon {
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #f0f0f0;
+        }
+
+        .lang-sound {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .about-link {
+            cursor: pointer;
+            font-size: 14px;
+            color: #f0f0f0;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+
+        .about-link:hover {
+            color: #ccc;
+        }
+
+        .lang,
+        .sound {
+            cursor: pointer;
+            font-size: 14px;
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+
+        .sound svg {
+            transition: opacity 0.3s ease;
+        }
+
+        .sound.muted svg {
+            opacity: 0.3;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(42, 42, 42, 0.98);
+            z-index: 2000;
+            transition: left 0.3s ease;
+            padding: 80px 30px 30px 30px;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .game-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(80, 80, 80, 0.5);
+            border-left: 3px solid #888;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-item:hover {
+            background: rgba(100, 100, 100, 0.7);
+            border-left-color: #f0f0f0;
+        }
+
+        .game-item.active {
+            background: rgba(136, 136, 136, 0.5);
+            border-left-color: #f0f0f0;
+        }
+
+        .game-item-title {
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .game-item-desc {
+            font-size: 12px;
+            color: #ccc;
+            letter-spacing: 1px;
+        }
+
+        .game-item.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .game-item.locked:hover {
+            background: rgba(80, 80, 80, 0.5);
+            border-left-color: #888;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .speed-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #ccc;
+            z-index: 10;
+        }
+
+        .speed-fast {
+            color: #f88;
+        }
+
+        /* About Page Styles */
+        .about-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(42, 42, 42, 0.98);
+            z-index: 3000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .about-page.show {
+            display: block;
+        }
+
+        .about-header {
+            position: sticky;
+            top: 0;
+            background: rgba(42, 42, 42, 0.98);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #555;
+            z-index: 10;
+        }
+
+        .about-title {
+            font-size: 24px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .close-about {
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            padding: 5px 10px;
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+
+        .about-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #555;
+            flex-wrap: wrap;
+        }
+
+        .about-tab {
+            padding: 15px 25px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .about-tab:hover {
+            color: #f0f0f0;
+        }
+
+        .about-tab.active {
+            color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .section-content {
+            font-size: 14px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .content-placeholder {
+            background: rgba(80, 80, 80, 0.3);
+            border: 2px dashed #666;
+            padding: 60px 30px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .content-placeholder:hover {
+            background: rgba(100, 100, 100, 0.5);
+            border-color: #888;
+        }
+
+        .placeholder-text {
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        .stats-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(42, 42, 42, 0.9);
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 50;
+            min-width: 150px;
+        }
+
+        .stats-title {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .stats-value {
+            font-size: 20px;
+            letter-spacing: 2px;
+            color: #f0f0f0;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stats-value:last-child {
+            margin-bottom: 0;
+        }
+
+        .content {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 32px;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+
+        .description {
+            font-size: 14px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+
+        .game-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score {
+            position: absolute;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: #f0f0f0;
+            z-index: 10;
+        }
+
+        .main-circle {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            box-shadow: 0 0 30px rgba(240, 240, 240, 0.3);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        .main-circle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 0%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 93% 7%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 100% 50%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 93% 93%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 50% 100%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 7% 93%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 0% 50%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%),
+                radial-gradient(circle at 7% 7%, transparent 88%, #f0f0f0 88%, #f0f0f0 95%, transparent 95%);
+        }
+
+        .player {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #555;
+            border: 2px solid #777;
+            transform-origin: center;
+            transition: all 0.1s ease;
+            z-index: 20;
+        }
+
+        .spike {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 42px solid #f0f0f0;
+            z-index: 15;
+            transform-origin: bottom center;
+            transition: transform 0.25s ease;
+        }
+
+        .spike.extended {
+            transform: scale(1);
+        }
+
+        .spike.retracted {
+            transform: scale(0);
+        }
+
+        .spike.retracting {
+            transition-duration: 0.75s;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: rgba(42, 42, 42, 0.95);
+            padding: 50px;
+            border: 3px solid #888;
+            display: none;
+            z-index: 100;
+        }
+
+        .game-over.show {
+            display: block;
+        }
+
+        .game-over h2 {
+            font-size: 36px;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+        }
+
+        .game-over p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+
+        .restart-button {
+            padding: 15px 50px;
+            border: 2px solid #888;
+            background-color: #888;
+            color: #2a2a2a;
+            font-size: 18px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .restart-button:hover {
+            background-color: #f0f0f0;
+            border-color: #f0f0f0;
+        }
+
+        .start-message {
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #888;
+            cursor: pointer;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 25;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
+        }
+
+        .start-message.hidden {
+            display: none;
+        }
+
+        #character-container {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 280px;
+            z-index: 24;
+            pointer-events: none;
+        }
+
+        #character-container.hidden {
+            display: none;
+        }
+
+        #character-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-title" onclick="location.href='index.html'" style="cursor: pointer;">Games</div>
+        <div class="game-item active">
+            <div class="game-item-title">Neon Jumper</div>
+            <div class="game-item-desc">Orbital jumping game</div>
+        </div>
+        <div class="game-item" onclick="location.href='neonsnake.html'">
+            <div class="game-item-title">Neon Snake</div>
+            <div class="game-item-desc">Classic Snake Game</div>
+        </div>
+        <div class="game-item" onclick="location.href='neon-stacker.html'">
+            <div class="game-item-title">Neon Stacker</div>
+            <div class="game-item-desc">Rhythm stacking game</div>
+        </div>
+        <div class="game-item" onclick="location.href='hex-flux-game.html'">
+            <div class="game-item-title">Neon Flux</div>
+            <div class="game-item-desc">Chaos Survival</div>
+        </div>
+    </div>
+
+    <div class="header">
+        <button class="menu-icon">☰</button>
+        <div class="lang-sound">
+            <a class="about-link" id="aboutLink">About</a>
+            <button class="lang">EN</button>
+            <button class="sound">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- About Page -->
+    <div class="about-page" id="aboutPage">
+        <div class="about-header">
+            <div class="about-title">About</div>
+            <button class="close-about" id="closeAbout">✕</button>
+        </div>
+        <div class="about-content">
+            <div class="about-tabs">
+                <button class="about-tab active" data-tab="creator">Creator</button>
+                <button class="about-tab" data-tab="theory">Game Theory</button>
+                <button class="about-tab" data-tab="story">Storybook</button>
+            </div>
+
+            <div class="tab-content active" id="creator">
+                <div class="section-title">About the Creator</div>
+                <div class="section-content">
+                    A glimpse into the mind behind the game.
+                </div>
+                <div class="content-placeholder" style="padding: 0; border: none; background: transparent;">
+                    <video controls style="width: 100%; max-width: 800px; border-radius: 8px; background: #000;">
+                        <source src="creator-video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="section-content">
+                    If the game keeps beating you, relax — our AI just finds you very predictable.
+                </div>
+            </div>
+
+            <div class="tab-content" id="theory">
+                <style>
+                    #theory .infographic-section {
+                        background-color: rgba(80, 80, 80, 0.3);
+                        border: 1px solid #555;
+                        padding: 30px;
+                        margin-bottom: 30px;
+                    }
+
+                    #theory .infographic-section:hover {
+                        background-color: rgba(80, 80, 80, 0.4);
+                        border-color: #777;
+                    }
+
+                    #theory .infographic-title {
+                        font-size: 1.5rem;
+                        letter-spacing: 3px;
+                        margin-bottom: 20px;
+                        text-transform: uppercase;
+                        color: #f0f0f0;
+                        border-bottom: 1px solid #555;
+                        padding-bottom: 10px;
+                    }
+
+                    #theory .infographic-content {
+                        color: #ccc;
+                        font-size: 0.95rem;
+                        line-height: 1.8;
+                    }
+
+                    #theory .highlight-box {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 30px;
+                    }
+
+                    #theory .stat-number {
+                        font-size: 5rem;
+                        font-weight: bold;
+                        color: #f0f0f0;
+                    }
+
+                    #theory .stat-label {
+                        font-size: 1.2rem;
+                        color: #888;
+                        letter-spacing: 2px;
+                    }
+
+                    #theory .chart-container {
+                        position: relative;
+                        width: 100%;
+                        max-width: 600px;
+                        margin: 20px auto;
+                        height: 300px;
+                        background-color: rgba(60, 60, 60, 0.5);
+                        padding: 20px;
+                        border: 1px solid #555;
+                    }
+
+                    #theory .tech-box {
+                        background-color: rgba(70, 70, 70, 0.5);
+                        border: 1px solid #666;
+                        padding: 20px;
+                        margin-bottom: 15px;
+                    }
+
+                    #theory .tech-box h3 {
+                        font-size: 1.1rem;
+                        letter-spacing: 2px;
+                        margin-bottom: 10px;
+                        color: #f0f0f0;
+                        text-transform: uppercase;
+                    }
+
+                    #theory table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0;
+                        background-color: rgba(60, 60, 60, 0.3);
+                    }
+
+                    #theory th,
+                    #theory td {
+                        padding: 15px;
+                        text-align: left;
+                        border: 1px solid #555;
+                    }
+
+                    #theory th {
+                        background-color: rgba(80, 80, 80, 0.5);
+                        font-weight: bold;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+                        font-size: 0.9rem;
+                    }
+
+                    #theory .flow-step {
+                        background-color: rgba(70, 70, 70, 0.5);
+                        border: 2px solid #777;
+                        padding: 20px;
+                        margin: 15px auto;
+                        max-width: 600px;
+                        text-align: center;
+                    }
+
+                    #theory .flow-arrow {
+                        text-align: center;
+                        font-size: 2rem;
+                        color: #888;
+                        margin: 10px 0;
+                    }
+                </style>
+
+                <div class="infographic-section">
+                    <h2 class="infographic-title">Anti-Adaptive AI in Game Design</h2>
+                    <div class="infographic-content">
+                        <div class="highlight-box">
+                            <div style="flex: 1; min-width: 300px;">
+                                <p>이 연구는 게임 디자인에서 플레이어의 학습과 적응을 의도적으로 방해하는 '반-적응형 AI'의 개념을 제안합니다. 기존 DDA(Dynamic
+                                    Difficulty Adjustment)가 플레이어를 편안한 몰입 상태로 유지하려 했다면, 반-적응형 AI는 플레이어의 고착된 패턴을 깨뜨리고 끊임없는
+                                    재평가를 유도합니다.</p>
+                            </div>
+                            <div class="highlight-stat">
+                                <div class="stat-number">∞</div>
+                                <div class="stat-label">UNPREDICTABLE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="infographic-section">
+                    <h2 class="infographic-title">DDA vs Anti-Adaptive AI</h2>
+                    <div class="chart-container">
+                        <canvas id="ddaChart"></canvas>
+                    </div>
+                    <p class="infographic-content" style="text-align: center; margin-top: 20px;">
+                        <strong>DDA (Dynamic Difficulty Adjustment)</strong>: 플레이어 실력에 맞춰 난이도를 조절하여 "Flow" 상태를 유지
+                    </p>
+
+                    <div class="chart-container">
+                        <canvas id="antiDdaChart"></canvas>
+                    </div>
+                    <p class="infographic-content" style="text-align: center; margin-top: 20px;">
+                        <strong>Anti-Adaptive AI</strong>: 플레이어가 숙달한 패턴을 무력화시켜 끊임없는 도전과 창의성을 유도
+                    </p>
+                </div>
+
+                <div class="infographic-section">
+                    <h2 class="infographic-title">Key Technologies</h2>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div class="tech-box" style="flex: 1; min-width: 250px;">
+                            <h3>PCG (Procedural Content Generation)</h3>
+                            <p>알고리즘을 통해 맵, 아이템, 퀘스트를 실시간으로 생성하여 플레이어가 예측할 수 없는 환경을 제공합니다.</p>
+                        </div>
+                        <div class="tech-box" style="flex: 1; min-width: 250px;">
+                            <h3>LLM (Large Language Models)</h3>
+                            <p>NPC 대화, 퀘스트 목표, 스토리 분기를 동적으로 생성하여 플레이어의 선택에 따라 게임이 진화합니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-container" style="max-width: 400px;">
+                        <canvas id="techDonutChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="infographic-section">
+                    <h2 class="infographic-title">Comparison Table</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Traditional DDA</th>
+                                <th>Anti-Adaptive AI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Core Goal</strong></td>
+                                <td>Player "Flow" & Comfort</td>
+                                <td>Player Disruption & Re-evaluation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Player Pattern</strong></td>
+                                <td>Assists the pattern (maintains flow)</td>
+                                <td>Counters the pattern (breaks flow)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Method</strong></td>
+                                <td>Adjusts difficulty (e.g., enemy health)</td>
+                                <td>Transforms environment (PCG/LLM)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Desired Experience</strong></td>
+                                <td>Mastery, Immersion</td>
+                                <td>Adaptability, Surprise, Creativity</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="infographic-section">
+                    <h2 class="infographic-title">Anti-Adaptive Logic Loop</h2>
+                    <p class="infographic-content" style="text-align: center; margin-bottom: 30px;">
+                        이 시스템은 지속적인 피드백 루프로 작동합니다.
+                    </p>
+
+                    <div class="flow-step">
+                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">STEP 1</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase;">SENSE: Player
+                            Action</div>
+                        <div style="font-size: 0.85rem; color: #aaa;">플레이어 행동 데이터 수집</div>
+                    </div>
+
+                    <div class="flow-arrow">↓</div>
+
+                    <div class="flow-step">
+                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">STEP 2</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase;">DETECT: Pattern
+                            Analysis</div>
+                        <div style="font-size: 0.85rem; color: #aaa;">AI가 반복 패턴을 감지</div>
+                    </div>
+
+                    <div class="flow-arrow">↓</div>
+
+                    <div class="flow-step">
+                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">STEP 3</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase;">TRANSFORM:
+                            Environment Change</div>
+                        <div style="font-size: 0.85rem; color: #aaa;">PCG/LLM으로 게임 세계 변경</div>
+                    </div>
+
+                    <div class="flow-arrow">↓</div>
+
+                    <div class="flow-step">
+                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">STEP 4</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase;">CHALLENGE: Force
+                            Adaptation</div>
+                        <div style="font-size: 0.85rem; color: #aaa;">플레이어는 새로운 전략 필요</div>
+                    </div>
+
+                    <div class="flow-arrow">↓</div>
+
+                    <div class="flow-step">
+                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">LOOP</div>
+                        <div style="font-size: 1.2rem; text-transform: uppercase;">Return to STEP 1</div>
+                    </div>
+                </div>
+
+                <div class="infographic-section">
+                    <h2 class="infographic-title">Conclusion</h2>
+                    <p class="infographic-content">
+                        '반-적응형 AI'는 게임의 수명을 연장하고 예측 불가능한 경험을 제공하는 새로운 디자인 철학입니다. 게임이 단순히 '풀리는 퍼즐'에서 벗어나 끊임없이 진화하는 살아있는
+                        세계로 변모할 수 있는 가능성을 제시합니다.
+                    </p>
+                </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    if (document.getElementById('ddaChart')) {
+                        Chart.defaults.color = '#ccc';
+                        Chart.defaults.borderColor = '#555';
+
+                        const flowLabels = ['Novice', 'Skillful', 'Expert', 'Master', 'Legend'];
+                        const baseLineOptions = {
+                            maintainAspectRatio: false,
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Player Skill', color: '#ccc' },
+                                    grid: { color: '#444' },
+                                    ticks: { color: '#aaa' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Challenge Level', color: '#ccc' },
+                                    grid: { color: '#444' },
+                                    ticks: { color: '#aaa' }
+                                }
+                            },
+                            plugins: {
+                                legend: { labels: { color: '#ccc' } }
+                            }
+                        };
+
+                        new Chart(document.getElementById('ddaChart'), {
+                            type: 'line',
+                            data: {
+                                labels: flowLabels,
+                                datasets: [
+                                    {
+                                        label: 'DDA Assisted Path',
+                                        data: [1.5, 2.5, 3.5, 4.5, 5.5],
+                                        borderColor: '#f0f0f0',
+                                        backgroundColor: '#f0f0f0',
+                                        fill: false,
+                                        tension: 0.1,
+                                        borderWidth: 2
+                                    },
+                                    {
+                                        label: 'Anxiety (Challenge > Skill)',
+                                        data: [2, 3, 4, 5, 6],
+                                        borderColor: '#888',
+                                        backgroundColor: 'rgba(136, 136, 136, 0.3)',
+                                        fill: '+1',
+                                        pointRadius: 0,
+                                        borderWidth: 1
+                                    },
+                                    {
+                                        label: 'Boredom (Skill > Challenge)',
+                                        data: [1, 2, 3, 4, 5],
+                                        borderColor: '#666',
+                                        backgroundColor: 'rgba(102, 102, 102, 0.3)',
+                                        fill: false,
+                                        pointRadius: 0,
+                                        borderWidth: 1
+                                    }
+                                ]
+                            },
+                            options: baseLineOptions
+                        });
+
+                        new Chart(document.getElementById('antiDdaChart'), {
+                            type: 'line',
+                            data: {
+                                labels: flowLabels,
+                                datasets: [
+                                    {
+                                        label: 'Anti-Adaptive Path',
+                                        data: [1.5, 2.5, 3.5, 3.0, 4.5, 5.0, 3.5],
+                                        borderColor: '#f0f0f0',
+                                        backgroundColor: '#f0f0f0',
+                                        fill: false,
+                                        tension: 0.3,
+                                        borderWidth: 2
+                                    },
+                                    {
+                                        label: 'Anxiety (Challenge > Skill)',
+                                        data: [2, 3, 4, 5, 6],
+                                        borderColor: '#888',
+                                        backgroundColor: 'rgba(136, 136, 136, 0.3)',
+                                        fill: '+1',
+                                        pointRadius: 0,
+                                        borderWidth: 1
+                                    },
+                                    {
+                                        label: 'Boredom (Skill > Challenge)',
+                                        data: [1, 2, 3, 4, 5],
+                                        borderColor: '#666',
+                                        backgroundColor: 'rgba(102, 102, 102, 0.3)',
+                                        fill: false,
+                                        pointRadius: 0,
+                                        borderWidth: 1
+                                    }
+                                ]
+                            },
+                            options: baseLineOptions
+                        });
+
+                        new Chart(document.getElementById('techDonutChart'), {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['PCG', 'LLMs'],
+                                datasets: [{
+                                    data: [60, 40],
+                                    backgroundColor: ['#f0f0f0', '#888'],
+                                    borderColor: '#555',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: { color: '#ccc', padding: 15 }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                </script>
+            </div>
+
+            <div class="tab-content" id="story">
+                <div class="section-title">The Story</div>
+                <div class="section-content">
+                    When his son struggles to beat a challenging game, a confident father steps in. "Don't worry, I'll
+                    clear it for you." But what seemed simple turns into an all-night battle of determination.
+                </div>
+                <div class="content-placeholder" style="cursor: pointer;"
+                    onclick="window.open('https://gemini.google.com/share/2f6d4e16aa0e', '_blank')">
+                    <div class="placeholder-text">📖 View Storybook</div>
+                    <div class="placeholder-text" style="margin-top: 10px; font-size: 12px;">Click to read the full
+                        story</div>
+                </div>
+                <div class="section-content">
+                    A heartwarming tale of a father's pride, unexpected difficulty, and the sunrise that finally comes
+                    after a long night of gaming. Sometimes, being a hero for your son takes more than you expect.
+                </div>
+            </div>
+        </div>
+    </div>
+    <title>Neon Jumper - Orbital Game</title>
+
+    <div class="content">
+        <h1 class="title">Neon Jumper</h1>
+        <p class="description">
+            Press SPACE to jump • Avoid the spikes
+        </p>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <div id="speedIndicator" class="speed-indicator">SPD: 90</div>
+        <div class="score" id="score">0</div>
+
+        <div class="main-circle"></div>
+        <div class="player" id="player"></div>
+
+        <div id="character-container"></div>
+        <div class="start-message" id="startMessage">Click to Start</div>
+
+        <div class="game-over" id="gameOver">
+            <h2>GAME OVER</h2>
+            <p id="finalScore">Score: 0</p>
+            <button class="restart-button" id="restartButton">Play Again</button>
+        </div>
+    </div>
+
+    <div class="stats-box">
+        <div class="stats-title">High Score</div>
+        <div class="stats-value" id="highScore">0</div>
+        <div class="stats-title">Last Score</div>
+        <div class="stats-value" id="lastScore">0</div>
+    </div>
+
+    <script>
+        // Sound Manager
+        class SoundManager {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggle(on) {
+                this.enabled = on;
+                if (this.enabled) this.init();
+            }
+
+            play(type) {
+                if (!this.enabled) return;
+                this.init(); // Ensure context is ready
+                if (!this.ctx) return;
+                
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                switch (type) {
+                    case 'ui':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(800, t);
+                        osc.frequency.exponentialRampToValueAtTime(400, t + 0.1);
+                        gain.gain.setValueAtTime(0.1, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                        osc.start(t);
+                        osc.stop(t + 0.1);
+                        break;
+                    case 'jump':
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(150, t);
+                        osc.frequency.linearRampToValueAtTime(300, t + 0.2);
+                        gain.gain.setValueAtTime(0.2, t);
+                        gain.gain.linearRampToValueAtTime(0, t + 0.2);
+                        osc.start(t);
+                        osc.stop(t + 0.2);
+                        break;
+                    case 'crash':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(100, t);
+                        osc.frequency.exponentialRampToValueAtTime(30, t + 0.4);
+                        gain.gain.setValueAtTime(0.3, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+                        osc.start(t);
+                        osc.stop(t + 0.4);
+                        break;
+                    case 'start':
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(220, t);
+                        osc.frequency.linearRampToValueAtTime(440, t + 0.3);
+                        gain.gain.setValueAtTime(0.1, t);
+                        gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                        osc.start(t);
+                        osc.stop(t + 0.3);
+                        break;
+                    case 'score':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(660, t);
+                        gain.gain.setValueAtTime(0.05, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                        osc.start(t);
+                        osc.stop(t + 0.1);
+                        break;
+                }
+            }
+        }
+        
+        const soundManager = new SoundManager();
+
+        const gameContainer = document.getElementById('gameContainer');
+        const player = document.getElementById('player');
+        const mainCircle = document.querySelector('.main-circle');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverScreen = document.getElementById('gameOver');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const startMessage = document.getElementById('startMessage');
+        const speedIndicator = document.getElementById('speedIndicator');
+
+        let score = 0;
+        let highScore = 0;
+        let lastScore = 0;
+        let angle = 0;
+        let radius = 220;
+        let playerDistance = 245;
+        let isJumping = false;
+        let jumpCount = 0;
+        let jumpLevel = 0;
+        let jumpResetTimeoutId = null;
+        let isGameOver = false;
+        let gameStarted = false;
+        let rotationSpeed = 0.9;
+        let spikes = [];
+        let currentPattern = [];
+        let lastPatternAngle = 0;
+        let gameLoop;
+        let lastTime = 0;
+        let hasCompletedFirstRotation = false;
+        let totalRotations = 0;
+        const rotationsBeforeDynamics = 3;
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function generatePattern(playerAngle) {
+            const pattern = [];
+            const numSpikes = 2 + Math.floor(Math.random() * 2);
+            const startAngle = playerAngle + 90;
+            for (let i = 0; i < numSpikes; i++) {
+                const baseAngle = startAngle + (i / numSpikes) * 200;
+                const randomOffset = (Math.random() - 0.5) * 24;
+                let spikeAngle = (baseAngle + randomOffset) % 360;
+                pattern.push({
+                    angle: spikeAngle,
+                    element: null,
+                    isExtended: false,
+                    hasBeenPassed: false,
+                    hasBeenApproached: false,
+                    stackCount: 1 + Math.floor(Math.random() * 2)
+                });
+            }
+            return pattern;
+        }
+
+        function createSpikes() {
+            if (!hasCompletedFirstRotation) return;
+
+            currentPattern.forEach((spikeData) => {
+                const baseAngle = spikeData.angle;
+                const stack = spikeData.stackCount || 1;
+                const groupId = Math.random().toString(36);
+
+                for (let k = 0; k < stack; k++) {
+                    const angleOffset = (k - (stack - 1) / 2) * 6;
+                    const spike = {
+                        ...spikeData,
+                        angle: (baseAngle + angleOffset + 360) % 360,
+                        element: document.createElement('div'),
+                        isExtended: false,
+                        hasBeenPassed: false,
+                        hasBeenApproached: false,
+                        halfWidth: 10 + Math.floor(Math.random() * 8),
+                        height: 48,
+                        retractTimeoutId: null,
+                        lastRelativeDiff: null,
+                        groupId: groupId,
+                        isGroupLeader: k === 0
+                    };
+
+                    spike.element.classList.add('spike');
+                    spike.element.classList.add('retracted');
+                    gameContainer.appendChild(spike.element);
+                    spike.element.style.borderLeft = spike.halfWidth + 'px solid transparent';
+                    spike.element.style.borderRight = spike.halfWidth + 'px solid transparent';
+                    spike.element.style.borderBottom = spike.height + 'px solid #f0f0f0';
+
+                    spikes.push(spike);
+                    updateSpikePosition(spike);
+                }
+            });
+        }
+
+        function extendSpike(spike) {
+            if (!spike.isExtended) {
+                spike.isExtended = true;
+                spike.element.classList.remove('retracting');
+                spike.element.classList.remove('retracted');
+                spike.element.classList.add('extended');
+                updateSpikePosition(spike);
+            }
+        }
+
+        function retractSpike(spike) {
+            if (spike.isExtended) {
+                spike.isExtended = false;
+                spike.element.classList.add('retracting');
+                spike.element.classList.remove('extended');
+                spike.element.classList.add('retracted');
+                updateSpikePosition(spike);
+            }
+        }
+
+        function updateSpikePosition(spike) {
+            const centerX = 300;
+            const centerY = 300;
+            const spikeDistance = radius - 1;
+
+            const x = centerX + Math.cos(spike.angle * Math.PI / 180) * spikeDistance;
+            const y = centerY + Math.sin(spike.angle * Math.PI / 180) * spikeDistance;
+
+            spike.element.style.left = (x - spike.halfWidth) + 'px';
+            spike.element.style.top = (y - spike.height) + 'px';
+
+            const scaleValue = spike.isExtended ? 1 : 0;
+            spike.element.style.transform = `rotate(${spike.angle + 90}deg) scale(${scaleValue})`;
+        }
+
+        function updateCircleSize() {
+            playerDistance = radius + 25;
+            mainCircle.style.width = (radius * 2) + 'px';
+            mainCircle.style.height = (radius * 2) + 'px';
+        }
+
+        function applyRandomDynamics() {
+            if (totalRotations < rotationsBeforeDynamics) return;
+
+            if (Math.random() < 0.012) {
+                const delta = (Math.random() * 0.8) - 0.4;
+                rotationSpeed = clamp(rotationSpeed + delta, 0.6, 2.6);
+                updateSpeedIndicator();
+            }
+
+            if (Math.random() < 0.006) {
+                const deltaR = (Math.random() * 30) - 15;
+                radius = clamp(radius + deltaR, 160, 260);
+                updateCircleSize();
+                spikes.forEach(s => updateSpikePosition(s));
+            }
+        }
+
+        function updatePlayerPosition() {
+            const centerX = 300;
+            const centerY = 300;
+
+            const jumpOffset = jumpLevel === 0 ? 0 : (jumpLevel === 1 ? 42 : (jumpLevel === 2 ? 70 : 95));
+            const distance = playerDistance + jumpOffset;
+
+            const x = centerX + Math.cos(angle * Math.PI / 180) * distance - 12;
+            const y = centerY + Math.sin(angle * Math.PI / 180) * distance - 12;
+
+            player.style.left = x + 'px';
+            player.style.top = y + 'px';
+        }
+
+        function updateSpeedIndicator() {
+            const speedValue = Math.round(rotationSpeed * 100);
+            speedIndicator.textContent = `SPD: ${speedValue}`;
+            if (speedValue > 150) {
+                speedIndicator.classList.add('speed-fast');
+            } else {
+                speedIndicator.classList.remove('speed-fast');
+            }
+        }
+
+        function jump() {
+            if (isGameOver || !gameStarted) return;
+            if (jumpCount >= 3) return;
+            
+            soundManager.play('jump');
+            
+            jumpCount += 1;
+            isJumping = true;
+            jumpLevel = Math.min(3, jumpCount);
+            if (jumpResetTimeoutId) clearTimeout(jumpResetTimeoutId);
+            jumpResetTimeoutId = setTimeout(() => {
+                isJumping = false;
+                jumpCount = 0;
+                jumpLevel = 0;
+                jumpResetTimeoutId = null;
+            }, 300);
+        }
+
+        function checkSpikePassing() {
+            return;
+        }
+
+        function updateSpikeApproach() {
+            const playerAngle = angle % 360;
+            const processedGroups = new Set();
+
+            spikes.forEach(spike => {
+                if (spike.isExtended) return;
+                if (processedGroups.has(spike.groupId)) return;
+
+                let spikeAngle = spike.angle % 360;
+                let diff = playerAngle - spikeAngle;
+                while (diff > 180) diff -= 360;
+                while (diff < -180) diff += 360;
+
+                if (diff < -12 && diff > -60) {
+                    const groupSpikes = spikes.filter(s => s.groupId === spike.groupId);
+                    groupSpikes.forEach(groupSpike => {
+                        extendSpike(groupSpike);
+                    });
+                    processedGroups.add(spike.groupId);
+                }
+            });
+        }
+
+        function checkCollisions() {
+            if (isJumping) return false;
+
+            const playerAngle = angle % 360;
+
+            for (let spike of spikes) {
+                if (!spike.isExtended) continue;
+
+                let spikeAngle = spike.angle % 360;
+                let diff = Math.abs(playerAngle - spikeAngle);
+
+                if (diff > 180) diff = 360 - diff;
+
+                if (diff < 3) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function update(currentTime) {
+            if (isGameOver || !gameStarted) return;
+
+            // Handle the case where currentTime is not provided (e.g. first call)
+            if (!currentTime) currentTime = performance.now();
+
+            if (!lastTime) lastTime = currentTime;
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+            
+            // Avoid NaN or extremely large delta times
+            if (isNaN(deltaTime) || deltaTime > 0.1) {
+                gameLoop = requestAnimationFrame(update);
+                return;
+            }
+
+            // Target 60 FPS for scaling
+            // rotationSpeed was calibrated for 60 FPS
+            // So we multiply by (deltaTime * 60) to keep the same speed
+            const timeScale = deltaTime * 60;
+
+            angle += rotationSpeed * timeScale;
+
+            if (angle >= 360) {
+                angle -= 360;
+                lastPatternAngle -= 360;
+                totalRotations++;
+
+                if (!hasCompletedFirstRotation) {
+                    hasCompletedFirstRotation = true;
+                }
+
+                updateCircleSize();
+
+                spikes.forEach(spike => {
+                    if (spike.element) {
+                        spike.element.remove();
+                    }
+                });
+                spikes = [];
+            }
+
+            updatePlayerPosition();
+            updateSpikeApproach();
+
+            if (hasCompletedFirstRotation && angle - lastPatternAngle >= 240) {
+                lastPatternAngle = angle;
+                currentPattern = generatePattern(angle);
+                createSpikes();
+            }
+
+            checkSpikePassing();
+
+            if (hasCompletedFirstRotation && checkCollisions()) {
+                gameOver();
+            }
+
+            applyRandomDynamics();
+
+            if (Math.random() < 0.1) { // Call occasionally or when speed changes
+                 updateSpeedIndicator();
+            }
+
+            applyRandomDynamics();
+
+            score += 0.1 * timeScale;
+            scoreDisplay.textContent = Math.floor(score);
+
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        function retractAllSpikesNow() {
+            return;
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            soundManager.play('crash');
+            gameOverScreen.classList.add('show');
+            finalScoreDisplay.textContent = `Score: ${Math.floor(score)}`;
+
+            // Update last score and high score
+            lastScore = Math.floor(score);
+            if (lastScore > highScore) {
+                highScore = lastScore;
+            }
+
+            // Update display
+            document.getElementById('highScore').textContent = highScore;
+            document.getElementById('lastScore').textContent = lastScore;
+
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+        }
+
+        function restartGame() {
+            soundManager.play('start');
+            // ... existing reset logic ...
+            // Stop the game loop
+            if (gameLoop) {
+                cancelAnimationFrame(gameLoop);
+                gameLoop = null;
+            }
+
+            isGameOver = false;
+            gameStarted = false;
+            score = 0;
+            angle = 0;
+            rotationSpeed = 0.9;
+            updateSpeedIndicator();
+            lastPatternAngle = 0;
+            isJumping = false;
+            jumpCount = 0;
+            jumpLevel = 0;
+            hasCompletedFirstRotation = false;
+            totalRotations = 0;
+            radius = 220;
+            playerDistance = 245;
+
+            mainCircle.style.width = (radius * 2) + 'px';
+            mainCircle.style.height = (radius * 2) + 'px';
+
+            scoreDisplay.textContent = '0';
+            gameOverScreen.classList.remove('show');
+            startMessage.classList.remove('hidden');
+            showCharacter();
+
+            spikes.forEach(spike => {
+                if (spike.element) {
+                    spike.element.remove();
+                }
+            });
+            spikes = [];
+
+            updatePlayerPosition();
+        }
+
+        function startGame() {
+            if (gameStarted) return;
+            gameStarted = true;
+            startMessage.classList.add('hidden');
+            hideCharacter();
+            angle = 0;
+            updatePlayerPosition();
+            currentPattern = generatePattern(angle);
+            updatePlayerPosition();
+            currentPattern = generatePattern(angle);
+            lastTime = 0; // Reset lastTime so update() initializes it
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameStarted && !isGameOver) {
+                    startGame();
+                } else if (gameStarted && !isGameOver) {
+                    jump();
+                }
+                // Do nothing if game is over - user must click Play Again button
+            }
+        });
+
+        gameContainer.addEventListener('click', (e) => {
+            // Don't handle clicks on the restart button or game over screen
+            if (e.target.id === 'restartButton' || e.target.closest('.game-over')) {
+                return;
+            }
+
+            if (!gameStarted && !isGameOver) {
+                startGame();
+            } else if (gameStarted && !isGameOver) {
+                jump();
+            }
+        });
+
+        document.querySelector('.menu-icon').addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        });
+
+        document.getElementById('sidebarOverlay').addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        });
+
+        document.querySelector('.lang').addEventListener('click', function () {
+            this.textContent = this.textContent === 'EN' ? 'KOR' : 'EN';
+        });
+
+        let soundOn = true;
+        const soundButton = document.querySelector('.sound');
+        soundButton.addEventListener('click', function () {
+            soundOn = !soundOn;
+            soundManager.toggle(soundOn);
+            soundManager.play('ui');
+            if (soundOn) {
+                this.classList.remove('muted');
+            } else {
+                this.classList.add('muted');
+            }
+        });
+
+        document.querySelectorAll('.game-item, .menu-icon, .about-link, .close-about, .about-tab, #restartButton').forEach(el => {
+            el.addEventListener('click', () => soundManager.play('ui'));
+        });
+
+        window.addEventListener('load', () => {
+            mainCircle.style.width = (radius * 2) + 'px';
+            mainCircle.style.height = (radius * 2) + 'px';
+            updatePlayerPosition();
+        });
+
+        document.getElementById('restartButton').addEventListener('click', () => {
+            restartGame();
+        });
+
+        // About Page Functionality
+        document.getElementById('aboutLink').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('aboutPage').classList.add('show');
+        });
+
+        document.getElementById('closeAbout').addEventListener('click', function () {
+            document.getElementById('aboutPage').classList.remove('show');
+        });
+
+        // Tab Switching
+        document.querySelectorAll('.about-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                // Remove active class from all tabs
+                document.querySelectorAll('.about-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab
+                this.classList.add('active');
+                const targetTab = this.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 3D Character code
+        let characterScene, characterCamera, characterRenderer, characterModel;
+        let characterLeftLeg, characterRightLeg, characterLeftArm, characterRightArm;
+
+        let characterWalkTime = 0;
+        let characterAnimationId = null;
+        let lastCharTime = 0;
+
+        function initCharacter() {
+            const container = document.getElementById('character-container');
+
+            // Scene
+            characterScene = new THREE.Scene();
+            characterScene.background = null; // Transparent
+
+            // Camera
+            characterCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            characterCamera.position.set(0, 1.5, 4);
+            characterCamera.lookAt(0, 1, 0);
+
+            // Renderer
+            characterRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            characterRenderer.setSize(280, 280);
+            characterRenderer.shadowMap.enabled = false;
+            container.appendChild(characterRenderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            characterScene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight.position.set(5, 10, 5);
+            characterScene.add(directionalLight);
+
+            // Create character
+            createCharacter();
+
+            // Start animation
+            animateCharacter();
+        }
+
+        function createCharacter() {
+            characterModel = new THREE.Group();
+            characterModel.position.y = 1.2;
+            characterScene.add(characterModel);
+
+            const material = new THREE.MeshStandardMaterial({
+                color: 0x555555,
+                roughness: 0.6
+            });
+
+            // HEAD
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), material);
+            head.position.y = 1;
+            characterModel.add(head);
+
+            // BODY
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), material);
+            body.position.y = 0.3;
+            characterModel.add(body);
+
+            // LEFT LEG
+            characterLeftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.7, 0.15), material);
+            characterLeftLeg.position.set(-0.15, -0.25, 0);
+            characterModel.add(characterLeftLeg);
+
+            // RIGHT LEG
+            characterRightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.7, 0.15), material);
+            characterRightLeg.position.set(0.15, -0.25, 0);
+            characterModel.add(characterRightLeg);
+
+            // LEFT ARM
+            characterLeftArm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.6, 0.12), material);
+            characterLeftArm.position.set(-0.42, 0.35, 0);
+            characterModel.add(characterLeftArm);
+
+            // RIGHT ARM
+            characterRightArm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.6, 0.12), material);
+            characterRightArm.position.set(0.42, 0.35, 0);
+            characterModel.add(characterRightArm);
+
+            // Rotate character to show diagonal side view
+            characterModel.rotation.y = Math.PI * 0.75; // 135 degrees for diagonal view
+        }
+
+        function animateCharacterWalking(timeScale) {
+            characterWalkTime += 0.05 * timeScale;
+
+            // Body bounce
+            characterModel.position.y = 1.2 + Math.abs(Math.sin(characterWalkTime * 2)) * 0.08;
+
+            // Leg swings
+            characterLeftLeg.rotation.x = Math.sin(characterWalkTime) * 0.7;
+            characterRightLeg.rotation.x = Math.sin(characterWalkTime + Math.PI) * 0.7;
+
+            // Arm swings
+            characterLeftArm.rotation.x = Math.sin(characterWalkTime + Math.PI) * 0.6;
+            characterRightArm.rotation.x = Math.sin(characterWalkTime) * 0.6;
+        }
+
+        function animateCharacter(currentTime) {
+            characterAnimationId = requestAnimationFrame(animateCharacter);
+
+            if (!currentTime) currentTime = performance.now();
+
+            if (!lastCharTime) lastCharTime = currentTime;
+            const deltaTime = (currentTime - lastCharTime) / 1000;
+            lastCharTime = currentTime;
+            
+            // Limit unusually large delta time (e.g. switching tabs)
+            const safeDelta = (isNaN(deltaTime) || deltaTime > 0.1) ? 0.016 : deltaTime;
+            const timeScale = safeDelta * 60;
+
+            animateCharacterWalking(timeScale);
+            characterRenderer.render(characterScene, characterCamera);
+        }
+
+        function stopCharacterAnimation() {
+            if (characterAnimationId) {
+                cancelAnimationFrame(characterAnimationId);
+                characterAnimationId = null;
+            }
+        }
+
+        function hideCharacter() {
+            document.getElementById('character-container').classList.add('hidden');
+            stopCharacterAnimation();
+        }
+
+        function showCharacter() {
+            const container = document.getElementById('character-container');
+            container.classList.remove('hidden');
+            if (!characterRenderer) {
+                initCharacter();
+            } else {
+                animateCharacter();
+            }
+        }
+
+        // Initialize character on page load
+        window.addEventListener('load', () => {
+            initCharacter();
+        });
+    </script>
+</body>
+
+</html>

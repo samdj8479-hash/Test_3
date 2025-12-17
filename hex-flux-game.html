@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Flux - Chaos Survival</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #111 0%, #222 100%);
+            color: #f0f0f0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background-color: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+
+        .menu-icon {
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            transition: color 0.3s ease;
+        }
+
+        .menu-icon:hover {
+            color: #fff;
+        }
+
+        .lang-sound {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .about-link {
+            cursor: pointer;
+            font-size: 14px;
+            color: #f0f0f0;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+
+        .about-link:hover {
+            color: #ccc;
+        }
+
+        .lang,
+        .sound {
+            cursor: pointer;
+            font-size: 14px;
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            width: 32px;
+        }
+
+        .sound svg {
+            transition: opacity 0.3s ease;
+        }
+
+        .sound.muted svg {
+            opacity: 0.3;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(26, 26, 26, 0.98);
+            z-index: 2000;
+            transition: left 0.3s ease;
+            padding: 80px 30px 30px 30px;
+            overflow-y: auto;
+            border-right: 1px solid #444;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .game-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(51, 51, 51, 0.5);
+            border-left: 3px solid #00ffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .game-item:hover {
+            background: rgba(51, 51, 51, 0.8);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .game-item.active {
+            background: rgba(51, 51, 51, 0.5);
+            border-left-color: #00ffff;
+        }
+
+        .game-item-title {
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #e0fffe;
+        }
+
+        .game-item-desc {
+            font-size: 12px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .game-item.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-left-color: #666;
+        }
+
+        .game-item.locked .game-item-title {
+            color: #888;
+        }
+
+        .game-item.locked:hover {
+            background: rgba(34, 34, 34, 0.5);
+            box-shadow: none;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* About Page */
+        .about-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(17, 17, 17, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .about-page.show {
+            display: block;
+        }
+
+        .about-header {
+            position: sticky;
+            top: 0;
+            background: rgba(17, 17, 17, 0.98);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            z-index: 10;
+        }
+
+        .about-title {
+            font-size: 24px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .close-about {
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+
+        .close-about:hover {
+            color: #fff;
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+
+        .about-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #333;
+            flex-wrap: wrap;
+        }
+
+        .about-tab {
+            padding: 15px 25px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .about-tab:hover {
+            color: #ccc;
+        }
+
+        .about-tab.active {
+            color: #00ffff;
+            border-bottom-color: #00ffff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .about-section {
+            margin-bottom: 40px;
+        }
+
+        .about-section-title {
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: #f0f0f0;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .about-text {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .control-item {
+            padding: 20px;
+            background: rgba(34, 34, 34, 0.5);
+            border: 1px solid #333;
+        }
+
+        .control-key {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #00ffff;
+        }
+
+        .control-desc {
+            font-size: 13px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .game-title-section {
+            text-align: center;
+            margin-bottom: 30px;
+            z-index: 10;
+        }
+
+        .game-title {
+            font-size: 48px;
+            letter-spacing: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: #f0f0f0;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        /* Game Container */
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            justify-content: center;
+            background: #000;
+            border-radius: 50%;
+            border: 2px solid #333;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* New Game Top Bar */
+        .game-top-bar {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #f0f0f0;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Overlays */
+        .game-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 20;
+        }
+
+        .game-overlay.show {
+            display: flex;
+        }
+
+        .overlay-title {
+            font-size: 56px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: #f0f0f0;
+            animation: pulse 2s infinite;
+        }
+
+        .overlay-subtitle {
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.8;
+            max-width: 400px;
+        }
+
+        .overlay-button {
+            padding: 15px 40px;
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: #f0f0f0;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .overlay-button:hover {
+            transform: scale(1.05);
+            background: #fff;
+        }
+
+        .game-over-overlay {
+            background: rgba(139, 0, 0, 0.4);
+        }
+
+        .game-over-title {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+        }
+
+        .game-over-score {
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .game-over-button {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #fff;
+        }
+
+        .game-over-button:hover {
+            background: #fff;
+            color: #8b0000;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+            .game-wrapper {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                gap: 60px;
+                width: 100%;
+                max-width: 1400px;
+            }
+
+            .game-left {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex: 0 0 auto;
+            }
+
+            .game-right {
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                max-width: 300px;
+                flex: 0 0 300px;
+            }
+
+            .info-section-title {
+                font-size: 14px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: #f0f0f0;
+                margin-bottom: 15px;
+                font-weight: bold;
+                border-bottom: 2px solid #333;
+                padding-bottom: 10px;
+            }
+
+            .game-info {
+                font-size: 12px;
+                letter-spacing: 1px;
+                color: #ccc;
+                line-height: 1.8;
+            }
+
+            .info-item {
+                margin: 10px 0;
+                padding-left: 20px;
+                position: relative;
+            }
+
+            .info-item:before {
+                content: '•';
+                position: absolute;
+                left: 0;
+                color: #00ffff;
+            }
+
+            @media (max-width: 1200px) {
+                .game-wrapper {
+                    flex-direction: column;
+                    gap: 40px;
+                }
+                
+                .game-right {
+                    max-width: 600px;
+                    flex: auto;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 40px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .game-right {
+                    grid-template-columns: 1fr;
+                }
+
+                .game-title {
+                    font-size: 32px;
+                    letter-spacing: 6px;
+                }
+
+                .game-subtitle {
+                    font-size: 10px;
+                }
+
+                .overlay-title {
+                    font-size: 36px;
+                    letter-spacing: 6px;
+                }
+            }
+        </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="menu-icon">☰</button>
+        <div class="lang-sound">
+            <a href="#" id="aboutLink" class="about-link">About</a>
+            <button class="lang">EN</button>
+            <button class="sound">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-title" onclick="location.href='index.html'" style="cursor: pointer;">Games</div>
+        <div class="game-item" onclick="location.href='neon-jumper.html'">
+            <div class="game-item-title">Neon Jumper</div>
+            <div class="game-item-desc">Orbital jumping game</div>
+        </div>
+        <div class="game-item" onclick="location.href='neonsnake.html'">
+            <div class="game-item-title">Neon Snake</div>
+            <div class="game-item-desc">Classic Snake Game</div>
+        </div>
+        <div class="game-item" onclick="location.href='neon-stacker.html'">
+            <div class="game-item-title">Neon Stacker</div>
+            <div class="game-item-desc">Rhythm stacking game</div>
+        </div>
+        <div class="game-item active">
+            <div class="game-item-title">Neon Flux</div>
+            <div class="game-item-desc">Chaos Survival</div>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- About Page -->
+    <div class="about-page" id="aboutPage">
+        <div class="about-header">
+            <div class="about-title">About Hex Flux</div>
+            <button class="close-about" id="closeAbout">✕</button>
+        </div>
+        <div class="about-content">
+            <div class="about-tabs">
+                <button class="about-tab active" data-tab="mechanicsTab">Mechanics</button>
+                <button class="about-tab" data-tab="theoryTab">Theory</button>
+                <button class="about-tab" data-tab="creatorTab">Creator</button>
+            </div>
+
+            <!-- Mechanics Tab -->
+            <div class="tab-content active" id="mechanicsTab">
+                <div class="about-section">
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <div class="control-key">← → Arrow Keys</div>
+                            <div class="control-desc">Rotate your player around the hexagon</div>
+                        </div>
+                        <div class="control-item">
+                            <div class="control-key">Objective</div>
+                            <div class="control-desc">Avoid incoming walls. The closer they get, the faster the music pulses.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theory Tab -->
+            <div class="tab-content" id="theoryTab">
+                <div class="about-section">
+                    <div class="about-section-title">Visual Disruption</div>
+                    <p class="about-text">
+                        The game uses a "Chaos Engine" to manipulate the camera rotation and zoom. 
+                        Unlike standard rhythm games, the beat here is visual—the entire world pulses 
+                        and rotates to disorient the player, forcing reliance on reflex over memory.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Creator Tab -->
+            <div class="tab-content" id="creatorTab">
+                <div class="about-section">
+                    <div class="about-section-title">Developer Note</div>
+                    <p class="about-text">
+                        "I wanted to make something that feels like being inside a microchip that's malfunctioning."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="game-wrapper">
+            <!-- Game Left Side -->
+            <div class="game-left">
+                <div class="game-title-section">
+                    <h1 class="game-title">NEON FLUX</h1>
+                    <p class="game-subtitle">Anti-Adaptive Rhythm Survival</p>
+                </div>
+
+                <div class="game-container">
+                    <div class="game-top-bar">
+                        <div class="stat-item">
+                            <span class="stat-label">SCORE</span>
+                            <span class="stat-value" id="scoreDisplay">0s</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">BEST</span>
+                            <span class="stat-value" id="bestDisplay">0s</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">SPD</span>
+                            <span class="stat-value" id="speedDisplay">1.0</span>
+                        </div>
+                    </div>
+
+                    <canvas id="gameCanvas" width="800" height="800"></canvas>
+
+                    <!-- Start Overlay -->
+                    <div class="game-overlay show" id="startOverlay">
+                        <h2 class="overlay-title">NEON FLUX</h2>
+                        <p class="overlay-subtitle">
+                            Use Arrow Keys to Rotate<br>
+                            Avoid the Walls
+                        </p>
+                        <button class="overlay-button" id="startButton">PRESS SPACE TO START</button>
+                    </div>
+
+                    <!-- Game Over Overlay -->
+                    <div class="game-overlay game-over-overlay" id="gameOverOverlay">
+                        <h2 class="overlay-title game-over-title">TERMINATED</h2>
+                        <p class="game-over-score" id="finalScore">TIME: 0s</p>
+                        <button class="overlay-button game-over-button" id="retryButton">RETRY</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Right Side (Info Panel) -->
+            <div class="game-right">
+                <div>
+                    <div class="info-section-title">How to Play</div>
+                    <div class="game-info">
+                        <div class="info-item">Use Left/Right Arrow Keys to rotate the hexagon player</div>
+                        <div class="info-item">Avoid the incoming walls (Red/White lines)</div>
+                        <div class="info-item">The game speeds up as you survive longer</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="info-section-title">Mechanics</div>
+                    <div class="game-info">
+                        <div class="info-item">Visual Chaos: The world pulses to the beat</div>
+                        <div class="info-item">Camera Shake: Increases with incoming threats</div>
+                        <div class="info-item">Adapt or Die: Patterns are procedurally generated</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="info-section-title">Scoring</div>
+                    <div class="game-info">
+                        <div class="info-item">Survival Time is your Score</div>
+                        <div class="info-item">Survive past 60s for "Flux State"</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sound Manager
+        class SoundManager {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggle(on) {
+                this.enabled = on;
+                if (this.enabled) this.init();
+            }
+
+            play(type) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                switch (type) {
+                    case 'ui':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(800, t);
+                        osc.frequency.exponentialRampToValueAtTime(400, t + 0.1);
+                        gain.gain.setValueAtTime(0.1, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                        osc.start(t);
+                        osc.stop(t + 0.1);
+                        break;
+                    case 'move':
+                        // Filtered noise approximation or quick slide
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(120, t);
+                        osc.frequency.linearRampToValueAtTime(240, t + 0.1);
+                        gain.gain.setValueAtTime(0.05, t);
+                        gain.gain.linearRampToValueAtTime(0, t + 0.1);
+                        osc.start(t);
+                        osc.stop(t + 0.1);
+                        break;
+                    case 'beat':
+                        // Kick drum
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(150, t);
+                        osc.frequency.exponentialRampToValueAtTime(0.01, t + 0.2);
+                        gain.gain.setValueAtTime(0.2, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                        osc.start(t);
+                        osc.stop(t + 0.2);
+                        break;
+                    case 'gameover':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(150, t);
+                        osc.frequency.exponentialRampToValueAtTime(40, t + 0.6);
+                        gain.gain.setValueAtTime(0.3, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+                        osc.start(t);
+                        osc.stop(t + 0.6);
+                        break;
+                    case 'start':
+                         osc.type = 'square';
+                         osc.frequency.setValueAtTime(220, t);
+                         osc.frequency.linearRampToValueAtTime(440, t + 0.3);
+                         gain.gain.setValueAtTime(0.1, t);
+                         gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                         osc.start(t);
+                         osc.stop(t + 0.3);
+                         break;
+                }
+            }
+
+            playBeat(freq) {
+                // Compatibility wrapper
+                this.play('beat');
+            }
+
+            playMove() {
+                // Compatibility wrapper
+                this.play('move');
+            }
+            
+            playGameOver() {
+                this.play('gameover');
+            }
+        }
+
+        const soundManager = new SoundManager();
+
+        // Game State
+        const GameState = {
+            START: 'START',
+            PLAYING: 'PLAYING',
+            GAME_OVER: 'GAME_OVER'
+        };
+
+        // Game Variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
+        const speedDisplay = document.getElementById('speedDisplay');
+        const startOverlay = document.getElementById('startOverlay');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        
+        // Load Best Score
+        let bestScore = localStorage.getItem('neonFluxBest') || 0;
+        bestDisplay.textContent = Math.floor(bestScore) + 's';
+
+        let gameState = GameState.START;
+        let playerAngle = 0;
+        let cameraAngle = 0;
+        let cameraZoom = 1;
+        let score = 0;
+        let walls = [];
+        let particles = [];
+        let time = 0;
+        let wallSpeed = 3.0;
+        let rotationVel = 0.5;
+        let paletteIndex = 0;
+        let lastTime = 0;
+
+        const CENTER_RADIUS = 30;
+        const SPAWN_RADIUS = 600;
+        const PLAYER_RADIUS = 50;
+        const HEX_SIDES = 6;
+
+        const PALETTES = [
+            { main: '#f0f0f0', accent: '#00ffff' },
+            { main: '#f0f0f0', accent: '#ff00ff' },
+            { main: '#f0f0f0', accent: '#ffff00' },
+            { main: '#ff0000', accent: '#ffffff' }
+        ];
+
+        const keysPressed = { left: false, right: false };
+
+        function initGame() {
+            gameState = GameState.PLAYING;
+            playerAngle = 0;
+            cameraAngle = 0;
+            cameraZoom = 1;
+            score = 0;
+            time = 0;
+            walls = [];
+            particles = [];
+            wallSpeed = 3.0;
+            rotationVel = 0.5;
+            paletteIndex = 0;
+            
+            startOverlay.classList.remove('show');
+            gameOverOverlay.classList.remove('show');
+            
+            soundManager.playBeat(220);
+            soundManager.play('start');
+            lastTime = performance.now();
+            requestAnimationFrame(update);
+        }
+
+        function spawnPattern() {
+            const pattern = Math.floor(Math.random() * 5);
+            const safeSector = Math.floor(Math.random() * HEX_SIDES);
+            const color = PALETTES[paletteIndex].accent;
+            const baseSpeed = wallSpeed + (Math.random() * 1.5);
+
+            const addWall = (sector, speedMod = 0, distanceMod = 0) => {
+                walls.push({
+                    id: Math.random(),
+                    sector: sector % HEX_SIDES,
+                    distance: SPAWN_RADIUS + distanceMod,
+                    speed: baseSpeed + speedMod,
+                    color
+                });
+            };
+
+            if (pattern === 0) {
+                for (let i = 0; i < HEX_SIDES; i++) {
+                    if (i !== safeSector) addWall(i);
+                }
+            } else if (pattern === 1) {
+                for (let i = 0; i < HEX_SIDES * 2; i++) {
+                    addWall((safeSector + i) % HEX_SIDES, 0, i * 60);
+                }
+            } else if (pattern === 2) {
+                for (let i = 0; i < HEX_SIDES; i += 2) {
+                    addWall(i);
+                }
+            } else if (pattern === 3) {
+                const gap2 = (safeSector + 3) % HEX_SIDES;
+                for (let i = 0; i < HEX_SIDES; i++) {
+                    if (i !== safeSector && i !== gap2) addWall(i);
+                }
+            } else {
+                for (let i = 0; i < 4; i++) {
+                    addWall(Math.floor(Math.random() * HEX_SIDES), Math.random() * 2, i * 30);
+                }
+            }
+        }
+
+        function spawnParticles(x, y, color) {
+            for (let i = 0; i < 15; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1.0,
+                    color
+                });
+            }
+        }
+
+        function update(currentTime) {
+            if (gameState !== GameState.PLAYING) return;
+
+            if (!lastTime) lastTime = currentTime;
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+
+            const safeDelta = (isNaN(deltaTime) || deltaTime > 0.1) ? 0.016 : deltaTime;
+            const timeScale = safeDelta * 60;
+
+            time += timeScale;
+            score += (1/60) * timeScale;
+            scoreDisplay.textContent = Math.floor(score) + 's';
+            
+            // Speed Display (based on wallSpeed, normalized)
+            const speedVal = (wallSpeed / 3.0).toFixed(1);
+            speedDisplay.textContent = speedVal;
+
+            // Camera rotation chaos
+            if (Math.floor(time) % 300 === 0 && Math.floor(time) !== 0) {
+                rotationVel = (Math.random() > 0.5 ? 1 : -1) * (0.5 + Math.random() * 1.5);
+                paletteIndex = (paletteIndex + 1) % PALETTES.length;
+                soundManager.playBeat(100 + (score % 50) * 10);
+            }
+
+            cameraAngle += rotationVel * timeScale;
+
+            const beat = Math.sin(time * 0.1);
+            cameraZoom = 1.0 + (beat * 0.05);
+
+            // Spawn walls
+            const spawnRate = Math.max(40, 100 - (score / 2));
+            if (Math.floor(time) % Math.floor(spawnRate) === 0) {
+                spawnPattern();
+            }
+
+            // Increase speed
+            if (Math.floor(time) % 600 === 0 && Math.floor(time) !== 0) {
+                wallSpeed += 0.5;
+            }
+
+            // Player movement
+            if (keysPressed.left) {
+                playerAngle -= 7 * timeScale;
+                soundManager.playMove();
+            }
+            if (keysPressed.right) {
+                playerAngle += 7 * timeScale;
+                soundManager.playMove();
+            }
+
+            // Update walls
+            const normalizedPlayerAngle = ((playerAngle % 360) + 360) % 360;
+            walls = walls.filter(wall => {
+                wall.distance -= wall.speed * timeScale;
+
+                const sectorStart = wall.sector * 60;
+                const hitDistance = 10;
+                
+                if (Math.abs(wall.distance - PLAYER_RADIUS) < hitDistance) {
+                    let pAngle = normalizedPlayerAngle;
+                    let relAngle = (pAngle - sectorStart + 360) % 360;
+                    
+                    if (relAngle >= 0 && relAngle <= 60) {
+                        gameOver();
+                    }
+                }
+
+                return wall.distance >= CENTER_RADIUS;
+            });
+
+            // Update particles
+            particles = particles.filter(p => {
+                p.x += p.vx * timeScale;
+                p.y += p.vy * timeScale;
+                p.life -= 0.05 * timeScale;
+                return p.life > 0;
+            });
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function gameOver() {
+            gameState = GameState.GAME_OVER;
+            const final = Math.floor(score);
+            if (final > bestScore) {
+                bestScore = final;
+                localStorage.setItem('neonFluxBest', bestScore);
+                bestDisplay.textContent = bestScore + 's';
+            }
+            finalScoreDisplay.textContent = `TIME: ${final}s`;
+            gameOverOverlay.classList.add('show');
+            soundManager.playGameOver();
+            spawnParticles(0, 0, '#ff0000');
+        }
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(cameraZoom, cameraZoom);
+            ctx.rotate((cameraAngle * Math.PI) / 180);
+
+            const currentPalette = PALETTES[paletteIndex];
+
+            // Draw center hexagon
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const theta = (i * 60 * Math.PI) / 180;
+                ctx.lineTo(Math.cos(theta) * CENTER_RADIUS, Math.sin(theta) * CENTER_RADIUS);
+            }
+            ctx.closePath();
+            ctx.fillStyle = currentPalette.main;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = currentPalette.accent;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Draw walls
+            walls.forEach(wall => {
+                const startAngle = (wall.sector * 60 * Math.PI) / 180;
+                const endAngle = ((wall.sector + 1) * 60 * Math.PI) / 180;
+                const thickness = 20;
+                const r1 = wall.distance;
+                const r2 = wall.distance + thickness;
+
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(startAngle) * r1, Math.sin(startAngle) * r1);
+                ctx.lineTo(Math.cos(endAngle) * r1, Math.sin(endAngle) * r1);
+                ctx.lineTo(Math.cos(endAngle) * r2, Math.sin(endAngle) * r2);
+                ctx.lineTo(Math.cos(startAngle) * r2, Math.sin(startAngle) * r2);
+                ctx.closePath();
+
+                ctx.fillStyle = wall.color;
+                if (wall.distance < PLAYER_RADIUS + 100) {
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = wall.color;
+                }
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Draw player
+            const playerRad = (playerAngle * Math.PI) / 180;
+            const px = Math.cos(playerRad) * PLAYER_RADIUS;
+            const py = Math.sin(playerRad) * PLAYER_RADIUS;
+
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(playerRad + Math.PI / 2);
+
+            ctx.beginPath();
+            ctx.moveTo(0, -6);
+            ctx.lineTo(5, 6);
+            ctx.lineTo(-5, 6);
+            ctx.closePath();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffffff';
+            ctx.fill();
+
+            ctx.restore();
+
+            // Draw guide lines
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 6; i++) {
+                const theta = (i * 60 * Math.PI) / 180;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(theta) * 1000, Math.sin(theta) * 1000);
+                ctx.stroke();
+            }
+
+            // Draw particles
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1.0;
+
+            ctx.restore();
+        }
+
+        // Event Listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft') keysPressed.left = true;
+            if (e.code === 'ArrowRight') keysPressed.right = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameState !== GameState.PLAYING) initGame();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft') keysPressed.left = false;
+            if (e.code === 'ArrowRight') keysPressed.right = false;
+        });
+
+        document.getElementById('startButton').addEventListener('click', initGame);
+        document.getElementById('retryButton').addEventListener('click', initGame);
+
+        // UI Controls
+        document.querySelector('.menu-icon').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        });
+
+        document.getElementById('sidebarOverlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        });
+
+        document.querySelector('.lang').addEventListener('click', function() {
+            this.textContent = this.textContent === 'EN' ? 'KO' : 'EN';
+        });
+
+        let soundEnabled = true;
+        document.querySelector('.sound').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            soundManager.toggle(soundEnabled);
+            soundManager.play('ui');
+            this.classList.toggle('muted');
+        });
+
+        document.querySelectorAll('.game-item, .menu-icon, .about-link, .close-about, .about-tab, #startButton, #retryButton').forEach(el => {
+            el.addEventListener('click', () => soundManager.play('ui'));
+        });
+
+        document.getElementById('aboutLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('aboutPage').classList.add('show');
+        });
+
+        document.getElementById('closeAbout').addEventListener('click', () => {
+            document.getElementById('aboutPage').classList.remove('show');
+        });
+
+        document.querySelectorAll('.about-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.about-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                this.classList.add('active');
+                const targetTab = this.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+
+</html>

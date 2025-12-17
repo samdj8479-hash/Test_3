@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anti-Adaptive AI Experiments</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #2a2a2a 0%, #3a3a3a 100%);
+            color: #f0f0f0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Left Side - Philosophy */
+        .intro-section {
+            flex: 1;
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid #444;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .intro-title {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            letter-spacing: -2px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #ccc;
+            max-width: 600px;
+            text-align: justify;
+        }
+
+        .highlight {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Right Side - Game Navigation */
+        .games-section {
+            flex: 1;
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, rgba(60, 60, 60, 0.4) 0%, rgba(40, 40, 40, 0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #444;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 220px;
+            text-decoration: none;
+            color: inherit;
+            backdrop-filter: blur(5px);
+        }
+
+        .game-card:hover {
+            background: rgba(51, 51, 51, 0.6);
+            border-left-color: #00ffff;
+            transform: translateX(5px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+
+        .card-icon {
+            margin-bottom: 10px;
+            width: 40px;
+            height: 40px;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        .game-card:hover .card-icon {
+            color: #00ffff;
+        }
+
+        .card-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #e0fffe;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.6;
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #333;
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover .status-dot {
+            background: #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            .intro-section, .games-section {
+                padding: 40px;
+                border: none;
+            }
+
+            .intro-section {
+                border-bottom: 1px solid #333;
+            }
+        }
+        /* Language Toggle */
+        .lang-toggle {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #888;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .lang-toggle:hover {
+            border-color: #00ffff;
+            color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left: Philosophy -->
+    <section class="intro-section">
+        <h1 class="intro-title" data-i18n="title">Anti-Adaptive<br>Experiments</h1>
+        <p class="intro-text" data-i18n="philosophy">
+            This system <span class="highlight">learns and analyzes your play patterns in real-time</span>. 
+            Whenever you get used to a specific strategy, the AI subtly changes the game's speed, timing, and patterns to create an unpredictable experience.
+            <br><br>
+            Memorization through repetition is impossible, and there are no fixed strategies or speedrun routes. 
+            Every moment requires new judgment and improvised response, and the difficulty evolves with your skill.
+            <br><br>
+            <em>You can never play the same game twice.</em>
+        </p>
+    </section>
+
+    <!-- Right: Game Links -->
+    <section class="games-section">
+        <div class="games-grid">
+            <!-- Neon Jumper -->
+            <a href="neon-jumper.html" class="game-card">
+                <div class="status-dot"></div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                    </svg>
+                </div>
+                <div class="card-title" data-i18n="jumper_title">Neon Jumper</div>
+                <div class="card-desc" data-i18n="jumper_desc">Orbital physics survival. Don't touch the spikes.</div>
+            </a>
+
+            <!-- Neon Snake -->
+            <a href="neonsnake.html" class="game-card">
+                <div class="status-dot"></div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 10h4v4H4zm12 0h4v4h-4zm-6 0h4v4h-4zm-6-6h4v4H4zm12 0h4v4h-4zm-6 0h4v4h-4zm-6 12h4v4H4zm12 0h4v4h-4zm-6 0h4v4h-4z"/>
+                    </svg>
+                </div>
+                <div class="card-title" data-i18n="snake_title">Neon Snake</div>
+                <div class="card-desc" data-i18n="snake_desc">Classic mechanics with anti-adaptive food logic.</div>
+            </a>
+
+            <!-- Neon Stacker -->
+            <a href="neon-stacker.html" class="game-card">
+                <div class="status-dot"></div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 15h16v-2H4v2zm0 4h16v-2H4v2zm0-8h16v-2H4v2zm0-6v2h16V5H4z"/>
+                    </svg>
+                </div>
+                <div class="card-title" data-i18n="stacker_title">Neon Stacker</div>
+                <div class="card-desc" data-i18n="stacker_desc">Rhythm-based stacking. Precision is key.</div>
+            </a>
+
+            <!-- Neon Flux -->
+            <a href="hex-flux-game.html" class="game-card">
+                <div class="status-dot"></div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2l-9.5 5.5v11L12 24l9.5-5.5v-11L12 2zm0 2.2l7.5 4.3v8.6L12 21.4l-7.5-4.3V8.5L12 4.2z"/>
+                    </svg>
+                </div>
+                <div class="card-title" data-i18n="flux_title">Neon Flux</div>
+                <div class="card-desc" data-i18n="flux_desc">Chaotic radial survival. Avoid the walls.</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Language Toggle -->
+    <button id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()">EN</button>
+
+    <script>
+        const translations = {
+            en: {
+                title: "Anti-Adaptive<br>Experiments",
+                philosophy: `This system <span class="highlight">learns and analyzes your play patterns in real-time</span>. 
+            Whenever you get used to a specific strategy, the AI subtly changes the game's speed, timing, and patterns to create an unpredictable experience.
+            <br><br>
+            Memorization through repetition is impossible, and there are no fixed strategies or speedrun routes. 
+            Every moment requires new judgment and improvised response, and the difficulty evolves with your skill.
+            <br><br>
+            <em>You can never play the same game twice.</em>`,
+                jumper_title: "Neon Jumper",
+                jumper_desc: "Orbital physics survival. Don't touch the spikes.",
+                snake_title: "Neon Snake",
+                snake_desc: "Classic mechanics with anti-adaptive food logic.",
+                stacker_title: "Neon Stacker",
+                stacker_desc: "Rhythm-based stacking. Precision is key.",
+                flux_title: "Neon Flux",
+                flux_desc: "Chaotic radial survival. Avoid the walls."
+            },
+            ko: {
+                title: "안티-어댑티브<br>실험실",
+                philosophy: `이 시스템은 <span class="highlight">당신의 플레이 패턴을 실시간으로 학습하고 분석합니다</span>. 
+            당신이 특정 전략에 익숙해질 때마다, AI는 게임의 속도, 타이밍, 패턴을 미묘하게 변화시켜 예측 불가능한 경험을 만들어냅니다.
+            <br><br>
+            반복을 통한 암기는 불가능하며, 정해진 공략이나 스피드런 루트는 존재하지 않습니다. 
+            매 순간 새로운 판단과 즉흥적인 대응이 요구되며, 난이도는 당신의 실력에 맞춰 진화합니다.
+            <br><br>
+            <em>당신은 결코 동일한 게임을 두 번 플레이할 수 없습니다.</em>`,
+                jumper_title: "네온 점퍼",
+                jumper_desc: "궤도 물리학 서바이벌. 가시에 닿지 마세요.",
+                snake_title: "네온 스네이크",
+                snake_desc: "안티-어댑티브 먹이 로직이 적용된 고전 스네이크.",
+                stacker_title: "네온 스태커",
+                stacker_desc: "리듬 기반 스태킹. 정확성이 핵심입니다.",
+                flux_title: "네온 플럭스",
+                flux_desc: "혼돈의 방사형 서바이벌. 벽을 피하세요."
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ko' : 'en';
+            updateContent();
+            updateToggleButton();
+        }
+
+        function updateToggleButton() {
+            const btn = document.getElementById('lang-toggle');
+            btn.textContent = currentLang === 'en' ? 'EN' : 'KR';
+        }
+
+        function updateContent() {
+            const t = translations[currentLang];
+            
+            document.querySelector('[data-i18n="title"]').innerHTML = t.title;
+            document.querySelector('[data-i18n="philosophy"]').innerHTML = t.philosophy;
+            
+            document.querySelector('[data-i18n="jumper_title"]').textContent = t.jumper_title;
+            document.querySelector('[data-i18n="jumper_desc"]').textContent = t.jumper_desc;
+            document.querySelector('[data-i18n="snake_title"]').textContent = t.snake_title;
+            document.querySelector('[data-i18n="snake_desc"]').textContent = t.snake_desc;
+            document.querySelector('[data-i18n="stacker_title"]').textContent = t.stacker_title;
+            document.querySelector('[data-i18n="stacker_desc"]').textContent = t.stacker_desc;
+            document.querySelector('[data-i18n="flux_title"]').textContent = t.flux_title;
+            document.querySelector('[data-i18n="flux_desc"]').textContent = t.flux_desc;
+        }
+    </script>
+
+</body>
+</html>

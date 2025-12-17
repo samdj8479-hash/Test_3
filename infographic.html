@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Game Design Infographic</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #2a2a2a 0%, #3a3a3a 100%);
+            color: #f0f0f0;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+            border-bottom: 2px solid #555;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            color: #f0f0f0;
+            font-weight: normal;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .section {
+            background-color: rgba(80, 80, 80, 0.3);
+            border: 1px solid #555;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            background-color: rgba(80, 80, 80, 0.4);
+            border-color: #777;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            color: #f0f0f0;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+        }
+
+        .section-content {
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            letter-spacing: 0.5px;
+        }
+
+        .highlight-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .highlight-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .highlight-stat {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #f0f0f0;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            color: #888;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            height: 300px;
+            background-color: rgba(60, 60, 60, 0.5);
+            padding: 20px;
+            border: 1px solid #555;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .tech-box {
+            background-color: rgba(70, 70, 70, 0.5);
+            border: 1px solid #666;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .tech-box h3 {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #f0f0f0;
+            text-transform: uppercase;
+        }
+
+        .tech-box p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: rgba(60, 60, 60, 0.3);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #555;
+        }
+
+        th {
+            background-color: rgba(80, 80, 80, 0.5);
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        td {
+            color: #ccc;
+            font-size: 0.85rem;
+        }
+
+        .flow-step {
+            background-color: rgba(70, 70, 70, 0.5);
+            border: 2px solid #777;
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .flow-step-label {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .flow-step-title {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #f0f0f0;
+            text-transform: uppercase;
+        }
+
+        .flow-step-desc {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: #888;
+            margin: 10px 0;
+        }
+
+        .tech-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .tech-grid {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .tech-grid > div {
+                flex: 1;
+            }
+
+            h1 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                letter-spacing: 2px;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+
+            .stat-number {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Beyond the 'Meta':<br>The Rise of Anti-Adaptive AI</h1>
+            <p class="subtitle">플레이어의 공략 패턴을 파훼하는 차세대 게임 AI 분석</p>
+        </header>
+
+        <div class="section">
+            <div class="highlight-box">
+                <div class="highlight-text">
+                    <h2 class="section-title">The Problem: The "Solved" Game</h2>
+                    <p class="section-content">
+                        현대 게임은 출시 후 빠르게 '최적 공략(meta)'이 확립되고 '스피드런'의 대상이 됩니다. 이는 개발자가 의도한 다양한 경험의 가능성을 축소시키고 콘텐츠 소모 속도를 가속화시킵니다. 플레이어가 시스템을 마스터하는 순간, 게임의 수명은 급격히 줄어듭니다.
+                    </p>
+                </div>
+                <div class="highlight-stat">
+                    <div class="stat-number">7</div>
+                    <div class="stat-number" style="font-size: 2.5rem;">일</div>
+                    <p class="stat-label">평균 "최적 공략" 확립 기간<br>(가상 데이터)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="section">
+                <h2 class="section-title">The Old Paradigm:<br>Adaptive AI (DDA)</h2>
+                <p class="section-content">
+                    기존의 AI, 특히 '동적 난이도 조절(DDA)'은 플레이어의 실력에 맞춰 난이도를 조절합니다. (Hunicke & Chapman, 2004) 이는 플레이어를 '지루함(Boredom)'과 '좌절(Anxiety)' 사이의 '몰입(Flow)' 상태에 머무르게 돕는 '적응형' 시스템입니다.
+                </p>
+                <div class="chart-container">
+                    <canvas id="ddaChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">The New Paradigm:<br>Anti-Adaptive AI</h2>
+                <p class="section-content">
+                    본 연구가 제안하는 '반-적응형' AI는 정반대의 접근을 취합니다. 플레이어의 정형화된 공략 패턴을 인지하면, AI는 의도적으로 환경을 변형시켜 플레이어를 '몰입' 채널 밖으로 밀어냅니다. 이는 플레이어가 기존 전략을 버리고 새로운 해법을 찾도록 강제합니다.
+                </p>
+                <div class="chart-container">
+                    <canvas id="antiDdaChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Enabling Technologies</h2>
+            <p class="section-content" style="text-align: center; margin-bottom: 30px;">
+                '반-적응형' AI는 두 가지 핵심 기술의 융합으로 가능해집니다. (Survey, 2024) '절차적 콘텐츠 생성(PCG)'은 맵, 아이템 등 구조적 요소를, '생성형 AI(LLM)'는 퀘스트, 스토리 등 서사적 요소를 실시간으로 변경합니다.
+            </p>
+            <div class="tech-grid">
+                <div style="max-width: 400px; margin: 0 auto;">
+                    <div class="chart-container">
+                        <canvas id="techDonutChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <div class="tech-box">
+                        <h3>Procedural Content Generation (PCG)</h3>
+                        <p>맵 구조, 레벨 디자인, 아이템 및 함정 배치를 실시간으로 재구성하여 플레이어의 경로 예측을 무력화합니다.</p>
+                    </div>
+                    <div class="tech-box">
+                        <h3>Generative AI (LLMs)</h3>
+                        <p>퀘스트 목표, NPC 대사, 스토리 분기점을 동적으로 생성하여 플레이어의 서사적 예측을 교란합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Comparative Analysis: AI Models</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Adaptive AI (DDA)</th>
+                            <th>Anti-Adaptive AI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Core Goal</strong></td>
+                            <td>Player "Flow" & Comfort</td>
+                            <td>Player Disruption & Re-evaluation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Player Pattern</strong></td>
+                            <td>Assists the pattern (maintains flow)</td>
+                            <td>Counters the pattern (breaks flow)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Method</strong></td>
+                            <td>Adjusts difficulty (e.g., enemy health)</td>
+                            <td>Transforms environment (PCG/LLM)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Desired Experience</strong></td>
+                            <td>Mastery, Immersion</td>
+                            <td>Adaptability, Surprise, Creativity</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Source</strong></td>
+                            <td>Hunicke & Chapman (2004)</td>
+                            <td>Thesis Concept (2025)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Anti-Adaptive Logic Loop</h2>
+            <p class="section-content" style="text-align: center; margin-bottom: 30px;">
+                이 시스템은 지속적인 피드백 루프로 작동합니다. 플레이어의 행동을 관찰하고, 패턴이 고착화되면 즉시 게임 세계를 변화시켜 새로운 도전을 제시합니다.
+            </p>
+            
+            <div class="flow-step">
+                <div class="flow-step-label">STEP 1</div>
+                <div class="flow-step-title">SENSE: Player Action</div>
+                <div class="flow-step-desc">플레이어 행동 데이터 수집 (경로, 사용 아이템, 소요 시간)</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+            
+            <div class="flow-step">
+                <div class="flow-step-label">STEP 2</div>
+                <div class="flow-step-title">DETECT: Pattern Analysis</div>
+                <div class="flow-step-desc">AI가 반복 패턴을 감지 ("플레이어가 동일한 전략을 3회 이상 사용")</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+            
+            <div class="flow-step">
+                <div class="flow-step-label">STEP 3</div>
+                <div class="flow-step-title">TRANSFORM: Environment Change</div>
+                <div class="flow-step-desc">PCG/LLM 활용하여 맵 구조, 퀘스트 목표, NPC 대화를 동적으로 변경</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+            
+            <div class="flow-step">
+                <div class="flow-step-label">STEP 4</div>
+                <div class="flow-step-title">CHALLENGE: Force Adaptation</div>
+                <div class="flow-step-desc">플레이어는 기존 전략 무력화됨 → 새로운 접근법 모색 필수</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+            
+            <div class="flow-step">
+                <div class="flow-step-label">LOOP</div>
+                <div class="flow-step-title">Return to STEP 1</div>
+                <div class="flow-step-desc">플레이어의 새로운 행동 패턴을 다시 관찰하며 순환 반복</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Conclusion</h2>
+            <p class="section-content">
+                '반-적응형 AI'는 플레이어의 학습과 숙달을 방해하는 것이 아니라, 게임의 수명을 연장하고 예측 불가능한 경험을 제공하는 새로운 디자인 철학입니다. 이는 게임이 단순히 '풀리는 퍼즐'에서 벗어나 끊임없이 진화하는 살아있는 세계로 변모할 수 있는 가능성을 제시합니다.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chart.js default colors for dark theme
+            Chart.defaults.color = '#ccc';
+            Chart.defaults.borderColor = '#555';
+
+            const flowLabels = ['Novice', 'Skillful', 'Expert', 'Master', 'Legend'];
+            const flowData = {
+                labels: flowLabels,
+                datasets: [
+                    {
+                        label: 'DDA Assisted Path',
+                        data: [1.5, 2.5, 3.5, 4.5, 5.5],
+                        borderColor: '#f0f0f0',
+                        backgroundColor: '#f0f0f0',
+                        fill: false,
+                        tension: 0.1,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Anxiety (Challenge > Skill)',
+                        data: [2, 3, 4, 5, 6],
+                        borderColor: '#888',
+                        backgroundColor: 'rgba(136, 136, 136, 0.3)',
+                        fill: '+1',
+                        pointRadius: 0,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Boredom (Skill > Challenge)',
+                        data: [1, 2, 3, 4, 5],
+                        borderColor: '#666',
+                        backgroundColor: 'rgba(102, 102, 102, 0.3)',
+                        fill: false,
+                        pointRadius: 0,
+                        borderWidth: 1
+                    }
+                ]
+            };
+            
+            const antiFlowData = {
+                labels: flowLabels,
+                datasets: [
+                    {
+                        label: 'Anti-Adaptive Path',
+                        data: [1.5, 2.5, 3.5, 3.0, 4.5, 5.0, 3.5],
+                        borderColor: '#f0f0f0',
+                        backgroundColor: '#f0f0f0',
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Anxiety (Challenge > Skill)',
+                        data: [2, 3, 4, 5, 6],
+                        borderColor: '#888',
+                        backgroundColor: 'rgba(136, 136, 136, 0.3)',
+                        fill: '+1',
+                        pointRadius: 0,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Boredom (Skill > Challenge)',
+                        data: [1, 2, 3, 4, 5],
+                        borderColor: '#666',
+                        backgroundColor: 'rgba(102, 102, 102, 0.3)',
+                        fill: false,
+                        pointRadius: 0,
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            const baseLineOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { 
+                            display: true, 
+                            text: 'Player Skill',
+                            color: '#ccc'
+                        },
+                        grid: {
+                            color: '#444'
+                        },
+                        ticks: {
+                            color: '#aaa'
+                        }
+                    },
+                    y: {
+                        title: { 
+                            display: true, 
+                            text: 'Challenge Level',
+                            color: '#ccc'
+                        },
+                        grid: {
+                            color: '#444'
+                        },
+                        ticks: {
+                            color: '#aaa'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ccc'
+                        }
+                    }
+                }
+            };
+
+            const ddaChartCtx = document.getElementById('ddaChart');
+            if (ddaChartCtx) {
+                new Chart(ddaChartCtx, {
+                    type: 'line',
+                    data: flowData,
+                    options: baseLineOptions
+                });
+            }
+
+            const antiDdaChartCtx = document.getElementById('antiDdaChart');
+            if (antiDdaChartCtx) {
+                new Chart(antiDdaChartCtx, {
+                    type: 'line',
+                    data: antiFlowData,
+                    options: baseLineOptions
+                });
+            }
+            
+            const techDonutChartCtx = document.getElementById('techDonutChart');
+            if (techDonutChartCtx) {
+                new Chart(techDonutChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Procedural Content\nGeneration (PCG)', 'Generative AI\n(LLMs)'],
+                        datasets: [{
+                            label: 'Tech Components',
+                            data: [60, 40],
+                            backgroundColor: [
+                                '#f0f0f0',
+                                '#888'
+                            ],
+                            borderColor: '#555',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#ccc',
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
